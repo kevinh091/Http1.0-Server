@@ -1,0 +1,32 @@
+CSE421 summer 2017
+Project 1
+myhttpd
+Final Design Document
+
+Team Name: Give me an A
+Members: 
+	Qiankai Huang: 50111368 qiankaih@bufflao.edu
+	Chi Chen: 50158677 cchen75@buffalo.edu
+	Yifu Yin: 50126368 yifuyin@buffalo.edu
+
+The data structure we used are priority_queue for queuing and scheduling. A request is put into a priority_queue when the queuing happens. The comparator is set according to the scheduling algorithm wanted.
+Upon scheduling, we just need to use the top of the queue.
+Vector for multithreading and our own implementation of semaphore/mutex for synchronization.
+
+Context switch: Since the scheduling algorithms required in this project are not preemptive, we do not need to make a context switch during executing the task. 
+However, different threads in this program voluntarily gets switched out by waiting for a socket connection, waiting for input and semephore etc. We included STL thread library so 
+the context switching is done by the UNIX system myhttpd is running on.
+
+Race condition is avoided by protecting the shared resources with mutex. In our case, the request queue is the shared resource, where working threads and the queuing/shceduling thread want to access and modify them. 
+Only one thread is allowed to access the priority_queue at a time.
+
+We initiate worker threads and server socket connection in main function and wait for client reaponse in a while loop. Then we initiate a queuing thread to listen for client connection. When receiving a client's request,
+the scheduling thread will parse the input stream and instantiate a struct, which stores the information about the request.
+After a certain period, release the worker threads which will take requests from the ready queue.
+Advantages: All the threads are protected and good use of CPU. Server can take many clients are handle many requests.
+Disadvantage: The struct that we used to store request information might have overheaded work.
+
+Work cited:
+https://linux.die.net/man/2/socket
+http://man7.org/linux/man-pages/man2/stat.2.html
+http://man7.org/linux/man-pages/man2/select.2.html
